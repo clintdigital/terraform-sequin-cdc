@@ -1,7 +1,5 @@
 # Sequin CDC Terraform module
 
-[![CI](https://github.com/clintdigital/terraform-sequin-cdc/actions/workflows/ci.yml/badge.svg)](https://github.com/clintdigital/terraform-sequin-cdc/actions/workflows/ci.yml)
-
 Terraform module that provisions a complete [Sequin](https://sequinstream.com) Change Data Capture (CDC) pipeline on top of the [clintdigital/sequin](https://registry.terraform.io/providers/clintdigital/sequin/latest) provider.
 
 - Database connection to PostgreSQL via Sequin
