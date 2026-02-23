@@ -1,12 +1,3 @@
-terraform {
-  required_version = ">= 1.0"
-  required_providers {
-    sequin = {
-      source = "clintdigital/sequin"
-    }
-  }
-}
-
 resource "sequin_database" "this" {
   name     = var.database_name
   hostname = var.postgres_host

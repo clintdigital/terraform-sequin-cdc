@@ -3,8 +3,7 @@ terraform {
 
   required_providers {
     sequin = {
-      source  = "clintdigital/sequin"
-      version = ">= 0.1"
+      source = "clintdigital/sequin"
     }
   }
 }
