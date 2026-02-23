@@ -256,12 +256,7 @@ terraform import 'module.sequin["tenant-a"].sequin_database.this' <database-id>
 - [with-filtering](examples/with-filtering) — all schema and table filter patterns in one place
 
 <!-- BEGIN_TF_DOCS -->
-## Requirements
 
-| Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3 |
-| <a name="requirement_sequin"></a> [sequin](#requirement\_sequin) | >= 0.1 |
 
 ## Providers
 
@@ -269,17 +264,13 @@ terraform import 'module.sequin["tenant-a"].sequin_database.this' <database-id>
 |------|---------|
 | <a name="provider_sequin"></a> [sequin](#provider\_sequin) | >= 0.1 |
 
-## Modules
-
-No modules.
-
 ## Resources
 
 | Name | Type |
 |------|------|
+| [sequin_backfill.this](https://registry.terraform.io/providers/clintdigital/sequin/latest/docs/resources/backfill) | resource |
 | [sequin_database.this](https://registry.terraform.io/providers/clintdigital/sequin/latest/docs/resources/database) | resource |
 | [sequin_sink_consumer.this](https://registry.terraform.io/providers/clintdigital/sequin/latest/docs/resources/sink_consumer) | resource |
-| [sequin_backfill.this](https://registry.terraform.io/providers/clintdigital/sequin/latest/docs/resources/backfill) | resource |
 
 ## Inputs
 
@@ -290,12 +281,12 @@ No modules.
 | <a name="input_postgres_host"></a> [postgres\_host](#input\_postgres\_host) | Hostname or IP address of the PostgreSQL server. | `string` | n/a | yes |
 | <a name="input_postgres_pass"></a> [postgres\_pass](#input\_postgres\_pass) | PostgreSQL password for the replication user. | `string` | n/a | yes |
 | <a name="input_postgres_user"></a> [postgres\_user](#input\_postgres\_user) | PostgreSQL username. The user must have replication privileges. | `string` | n/a | yes |
-| <a name="input_backfills"></a> [backfills](#input\_backfills) | Map of backfills to create. The map key is used as the backfill identifier. Backfills replay historical rows into an existing consumer. Attributes: `consumer_name` (required) — key of the consumer to backfill; `tables` (optional) — list of fully-qualified table names, e.g. `["public.orders", "public.items"]`, one backfill resource per entry; omit to backfill all tables; `state` (optional) — `"active"` to start immediately or `"paused"`. | <pre>map(object({<br>  consumer_name = string<br>  tables        = optional(list(string))<br>  state         = optional(string)<br>}))</pre> | `{}` | no |
-| <a name="input_consumers"></a> [consumers](#input\_consumers) | Map of sink consumers to create. The map key becomes the consumer name in Sequin. See the [README](https://registry.terraform.io/modules/clintdigital/cdc/sequin/latest) for full schema documentation covering filtering, destination types (kafka/sqs/kinesis/webhook), function references, and advanced options. | `any` | `{}` | no |
+| <a name="input_backfills"></a> [backfills](#input\_backfills) | Map of backfills to create. The map key is used as the backfill identifier.<br/>Backfills replay historical rows from a table into an existing consumer.<br/><br/>Attributes:<br/>- `consumer_name` (required) — Key of the consumer in `var.consumers` to backfill.<br/>- `tables`        (optional) — List of fully-qualified table names to backfill (e.g. `["public.orders", "public.items"]`). Omit or leave empty to backfill all tables. One `sequin_backfill` resource is created per table entry.<br/>- `state`         (optional) — Initial state: `"active"` to start immediately, `"paused"` to hold. | <pre>map(object({<br/>    consumer_name = string<br/>    tables        = optional(list(string))<br/>    state         = optional(string)<br/>  }))</pre> | `{}` | no |
+| <a name="input_consumers"></a> [consumers](#input\_consumers) | Map of sink consumers to create. The map key becomes the consumer name in Sequin.<br/><br/>Filtering (all optional — omit to receive all changes):<br/>- `schemas.include`     — List of schema names to include.<br/>- `schemas.exclude`     — List of schema names to exclude.<br/>- `tables.include`      — List of `{ name, group_column_names? }` objects to include.<br/>- `tables.exclude`      — List of `{ name }` objects to exclude from the include set.<br/>- `actions`             — DML events to capture. Default: `["insert", "update", "delete"]`.<br/>- `filter_function`     — Name of a Sequin filter function (must exist in Sequin beforehand).<br/><br/>Functions (all optional, must exist in Sequin beforehand):<br/>- `enrichment_function` — Enriches each record before delivery.<br/>- `transform_function`  — Transforms the message payload.<br/>- `routing_function`    — Routes messages to different destinations dynamically.<br/><br/>Destination (required):<br/>- `type`                — One of `kafka`, `sqs`, `kinesis`, `webhook`.<br/>- Kafka fields:   `hosts`, `topic`, `tls`, `username`, `password`, `sasl_mechanism`.<br/>- SQS fields:     `queue_url`, `region`, `access_key_id`, `secret_access_key`, `is_fifo`.<br/>- Kinesis fields: `stream_arn`, `region`, `access_key_id`, `secret_access_key`.<br/>- Webhook fields: `http_endpoint`, `http_endpoint_path`, `batch`.<br/><br/>Advanced (all optional):<br/>- `status`               — Consumer status: `"active"` or `"disabled"`.<br/>- `batch_size`           — Number of records per delivery batch.<br/>- `message_grouping`     — Whether to group messages by `group_column_names`.<br/>- `max_retry_count`      — Maximum delivery retry attempts before dead-lettering.<br/>- `load_shedding_policy` — Behaviour when the consumer falls behind: `"pause"` or `"discard"`.<br/>- `timestamp_format`     — Timestamp format in delivered messages. | `any` | `{}` | no |
 | <a name="input_postgres_port"></a> [postgres\_port](#input\_postgres\_port) | Port the PostgreSQL server is listening on. | `number` | `5432` | no |
 | <a name="input_postgres_ssl"></a> [postgres\_ssl](#input\_postgres\_ssl) | Whether to require SSL for the PostgreSQL connection. | `bool` | `true` | no |
 | <a name="input_prevent_destroy"></a> [prevent\_destroy](#input\_prevent\_destroy) | When `true`, Terraform will refuse to destroy the database resource, preventing accidental deletion of the Sequin connection and all its consumers. | `bool` | `true` | no |
-| <a name="input_replication_slots"></a> [replication\_slots](#input\_replication\_slots) | Logical replication slot and publication configuration. Attributes: `publication_name` (required), `slot_name` (required), `status` (optional, default `"active"`). | <pre>list(object({<br>  publication_name = string<br>  slot_name        = string<br>  status           = optional(string, "active")<br>}))</pre> | <pre>[{<br>  publication_name = "sequin_pub"<br>  slot_name        = "sequin_slot"<br>}]</pre> | no |
+| <a name="input_replication_slots"></a> [replication\_slots](#input\_replication\_slots) | Logical replication slot and publication configuration.<br/><br/>Attributes:<br/>- `publication_name` (required) — PostgreSQL publication name.<br/>- `slot_name`        (required) — PostgreSQL replication slot name.<br/>- `status`           (optional) — Slot status. Defaults to `"active"`. | <pre>list(object({<br/>    publication_name = string<br/>    slot_name        = string<br/>    status           = optional(string, "active")<br/>  }))</pre> | <pre>[<br/>  {<br/>    "publication_name": "sequin_pub",<br/>    "slot_name": "sequin_slot"<br/>  }<br/>]</pre> | no |
 
 ## Outputs
 
