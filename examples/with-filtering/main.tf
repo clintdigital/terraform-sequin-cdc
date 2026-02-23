@@ -15,13 +15,13 @@ module "sequin" {
     orders-and-items = {
       tables = {
         include = [
-          { 
-            name = "public.orders", 
-            group_column_names = ["customer_id"] 
+          {
+            name               = "public.orders",
+            group_column_names = ["customer_id"]
           },
-          { 
-            name = "public.order_items", 
-            group_column_names = ["order_id"] 
+          {
+            name               = "public.order_items",
+            group_column_names = ["order_id"]
           },
         ]
       }
@@ -40,8 +40,8 @@ module "sequin" {
 
     # 2. Entire schema — every table under "inventory"
     inventory-schema = {
-      schemas = { 
-        include = ["inventory"] 
+      schemas = {
+        include = ["inventory"]
       }
 
       destination = {
@@ -57,8 +57,8 @@ module "sequin" {
 
     # 3. All schemas except "internal" and "audit"
     skip-internal = {
-      schemas = { 
-        exclude = ["internal", "audit"] 
+      schemas = {
+        exclude = ["internal", "audit"]
       }
 
       destination = {
@@ -76,19 +76,19 @@ module "sequin" {
     public-skip-audit = {
       tables = {
         include = [
-          { 
-            name = "public.users" 
+          {
+            name = "public.users"
           },
-          { 
-            name = "public.accounts" 
+          {
+            name = "public.accounts"
           },
-          { 
-            name = "public.sessions" 
+          {
+            name = "public.sessions"
           },
         ]
         exclude = [
-          { 
-            name = "public.sessions" 
+          {
+            name = "public.sessions"
           },
         ]
       }

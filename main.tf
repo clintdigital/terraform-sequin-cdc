@@ -61,9 +61,9 @@ locals {
     for name, bf in var.backfills :
     length(coalesce(bf.tables, [])) > 0
     ? { for t in bf.tables : "${name}/${t}" => {
-        consumer_name = bf.consumer_name
-        table         = t
-        state         = bf.state
+      consumer_name = bf.consumer_name
+      table         = t
+      state         = bf.state
       }
     }
     : {

@@ -88,8 +88,8 @@ variable "consumers" {
     - `load_shedding_policy` — Behaviour when the consumer falls behind: `"pause"` or `"discard"`.
     - `timestamp_format`     — Timestamp format in delivered messages.
   EOT
-  type    = any
-  default = {}
+  type        = any
+  default     = {}
 }
 
 variable "backfills" {

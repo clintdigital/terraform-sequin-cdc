@@ -20,11 +20,11 @@ module "sequin" {
       actions = ["insert", "update", "delete"]
 
       destination = {
-        type                  = "kinesis"
-        stream_arn            = var.kinesis_stream_arn
-        region                = var.aws_region
-        access_key_id         = var.aws_access_key_id
-        secret_access_key     = var.aws_secret_access_key
+        type              = "kinesis"
+        stream_arn        = var.kinesis_stream_arn
+        region            = var.aws_region
+        access_key_id     = var.aws_access_key_id
+        secret_access_key = var.aws_secret_access_key
       }
 
       message_grouping = true
