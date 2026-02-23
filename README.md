@@ -231,6 +231,14 @@ consumers = {
 
 `filter_function`, `enrichment_function`, `transform_function`, and `routing_function` accept a **function name string**. The function must be created in the Sequin UI or API before referencing it here — this module does not manage function resources.
 
+**Execution order**: When multiple functions are specified, they are applied in this order:
+1. `filter_function` — drops messages that don't match criteria
+2. `enrichment_function` — adds additional fields to the message
+3. `transform_function` — modifies the message structure/content
+4. `routing_function` — dynamically chooses the destination topic/queue
+
+See the [with-functions](examples/with-functions) example for practical usage of all four function types.
+
 ## Import existing resources
 
 ```bash
@@ -254,6 +262,7 @@ terraform import 'module.sequin["tenant-a"].sequin_database.this' <database-id>
 - [kinesis](examples/kinesis) — stream changes into Amazon Kinesis Data Streams, with initial backfill
 - [multi-tenant](examples/multi-tenant) — one pipeline per tenant using `for_each` on the module
 - [with-filtering](examples/with-filtering) — all schema and table filter patterns in one place
+- [with-functions](examples/with-functions) — demonstrates all four function types: filter, enrichment, transform, and routing
 
 <!-- BEGIN_TF_DOCS -->
 
