@@ -1,50 +1,43 @@
 variable "database_name" {
-  description = "Unique name for the Sequin database connection. Used to identify the connection in Sequin and as a reference in sink consumers."
+  description = "Name for the Sequin database connection."
   type        = string
 }
 
 variable "postgres_host" {
-  description = "Hostname or IP address of the PostgreSQL server."
+  description = "PostgreSQL host address."
   type        = string
 }
 
 variable "postgres_port" {
-  description = "Port the PostgreSQL server is listening on."
+  description = "PostgreSQL port."
   type        = number
   default     = 5432
 }
 
 variable "postgres_db" {
-  description = "Name of the PostgreSQL database to connect to."
+  description = "PostgreSQL database name."
   type        = string
 }
 
 variable "postgres_user" {
-  description = "PostgreSQL username. The user must have replication privileges."
+  description = "PostgreSQL username. Must have replication privileges."
   type        = string
 }
 
 variable "postgres_pass" {
-  description = "PostgreSQL password for the replication user."
+  description = "PostgreSQL password."
   type        = string
   sensitive   = true
 }
 
 variable "postgres_ssl" {
-  description = "Whether to require SSL for the PostgreSQL connection."
+  description = "Enable SSL for the PostgreSQL connection."
   type        = bool
   default     = true
 }
 
 variable "replication_slots" {
-  description = <<-EOT
-    Logical replication slot and publication configuration.
-
-    Attributes:
-    - `publication_name` (required) — PostgreSQL publication name.
-    - `slot_name`        (required) — PostgreSQL replication slot name.
-    - `status`           (optional) — Slot status. Defaults to `"active"`.
-  EOT
+  description = "Replication slot and publication pairs. Each object requires `publication_name` and `slot_name`; `status` defaults to `\"active\"`."
   type = list(object({
     publication_name = string
     slot_name        = string
@@ -57,51 +50,13 @@ variable "replication_slots" {
 }
 
 variable "consumers" {
-  description = <<-EOT
-    Map of sink consumers to create. The map key becomes the consumer name in Sequin.
-
-    Filtering (all optional — omit to receive all changes):
-    - `schemas.include`     — List of schema names to include.
-    - `schemas.exclude`     — List of schema names to exclude.
-    - `tables.include`      — List of `{ name, group_column_names? }` objects to include.
-    - `tables.exclude`      — List of `{ name }` objects to exclude from the include set.
-    - `actions`             — DML events to capture. Default: `["insert", "update", "delete"]`.
-    - `filter_function`     — Name of a Sequin filter function (must exist in Sequin beforehand).
-
-    Functions (all optional, must exist in Sequin beforehand):
-    - `enrichment_function` — Enriches each record before delivery.
-    - `transform_function`  — Transforms the message payload.
-    - `routing_function`    — Routes messages to different destinations dynamically.
-
-    Destination (required):
-    - `type`                — One of `kafka`, `sqs`, `kinesis`, `webhook`.
-    - Kafka fields:   `hosts`, `topic`, `tls`, `username`, `password`, `sasl_mechanism`.
-    - SQS fields:     `queue_url`, `region`, `access_key_id`, `secret_access_key`, `is_fifo`.
-    - Kinesis fields: `stream_arn`, `region`, `access_key_id`, `secret_access_key`.
-    - Webhook fields: `http_endpoint`, `http_endpoint_path`, `batch`.
-
-    Advanced (all optional):
-    - `status`               — Consumer status: `"active"` or `"disabled"`.
-    - `batch_size`           — Number of records per delivery batch.
-    - `message_grouping`     — Whether to group messages by `group_column_names`.
-    - `max_retry_count`      — Maximum delivery retry attempts before dead-lettering.
-    - `load_shedding_policy` — Behaviour when the consumer falls behind: `"pause"` or `"discard"`.
-    - `timestamp_format`     — Timestamp format in delivered messages.
-  EOT
+  description = "Map of sink consumers to create (key = consumer name). Each value requires a `destination` object with `type` (`kafka`, `sqs`, `kinesis`, or `webhook`) and its connection fields. Supports optional schema/table filtering, `actions`, function references, and advanced delivery settings. See the README for the full schema."
   type        = any
   default     = {}
 }
 
 variable "backfills" {
-  description = <<-EOT
-    Map of backfills to create. The map key is used as the backfill identifier.
-    Backfills replay historical rows from a table into an existing consumer.
-
-    Attributes:
-    - `consumer_name` (required) — Key of the consumer in `var.consumers` to backfill.
-    - `tables`        (optional) — List of fully-qualified table names to backfill (e.g. `["public.orders", "public.items"]`). Omit or leave empty to backfill all tables. One `sequin_backfill` resource is created per table entry.
-    - `state`         (optional) — Initial state: `"active"` to start immediately, `"paused"` to hold.
-  EOT
+  description = "Map of backfills to create (key = backfill name). Each value requires `consumer_name`; optionally `tables` (list of fully-qualified table names — omit to backfill all) and `state` (`\"active\"` or `\"paused\"`)."
   type = map(object({
     consumer_name = string
     tables        = optional(list(string))
@@ -111,7 +66,7 @@ variable "backfills" {
 }
 
 variable "prevent_destroy" {
-  description = "When `true`, Terraform will refuse to destroy the database resource, preventing accidental deletion of the Sequin connection and all its consumers."
+  description = "Prevent accidental destruction of the database resource and all its consumers."
   type        = bool
   default     = true
 }
