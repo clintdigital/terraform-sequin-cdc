@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  fmt:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Format
+        run: terraform fmt -check -recursive
+
+  # TODO: re-enable once clintdigital/sequin is published to the Terraform Registry.
+  # terraform init (required by validate) downloads the provider — it will fail until then.
+  #
+  # validate:
+  #   name: Validate
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       dir:
+  #         - .
+  #         - examples/basic
+  #         - examples/complete
+  #         - examples/kinesis
+  #         - examples/multi-tenant
+  #         - examples/with-filtering
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: hashicorp/setup-terraform@v3
+  #     - run: terraform init -backend=false
+  #       working-directory: ${{ matrix.dir }}
+  #     - run: terraform validate
+  #       working-directory: ${{ matrix.dir }}
+
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Render terraform docs and fail if README is out of date
+        uses: terraform-docs/gh-actions@v1
+        with:
+          working-dir: .
+          config-file: .terraform-docs.yml
+          output-file: README.md
+          output-method: inject
+          git-push: "false"
+          fail-on-diff: "true"
