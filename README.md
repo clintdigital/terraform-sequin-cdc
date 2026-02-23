@@ -271,7 +271,7 @@ terraform import 'module.sequin["tenant-a"].sequin_database.this' <database-id>
 
 | Name | Version |
 |------|---------|
-| <a name="provider_sequin"></a> [sequin](#provider\_sequin) | >= 0.1 |
+| <a name="provider_sequin"></a> [sequin](#provider\_sequin) | n/a |
 
 ## Resources
 
