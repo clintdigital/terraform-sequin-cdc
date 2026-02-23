@@ -105,4 +105,25 @@ module "sequin" {
       }
     }
   }
+
+  backfills = {
+    # Backfill specific tables per consumer
+    orders-backfill = {
+      consumer_name = "orders-and-items"
+      tables        = ["public.orders", "public.order_items"]
+      state         = "active"
+    }
+
+    users-backfill = {
+      consumer_name = "public-skip-audit"
+      tables        = ["public.users", "public.accounts"]
+      state         = "active"
+    }
+
+    # Backfill all tables in the inventory schema consumer (tables omitted)
+    inventory-backfill = {
+      consumer_name = "inventory-schema"
+      state         = "active"
+    }
+  }
 }

@@ -49,4 +49,12 @@ module "sequin" {
       message_grouping = true
     }
   }
+
+  backfills = {
+    "${each.key}-full-load" = {
+      consumer_name = "${each.key}-changes"
+      # tables omitted — backfills every table for this tenant
+      state = "active"
+    }
+  }
 }

@@ -137,7 +137,7 @@ module "sequin" {
   backfills = {
     orders-initial = {
       consumer_name = "orders-to-kafka"
-      table         = "public.orders"
+      tables        = ["public.orders", "public.order_items"] # omit to backfill all tables
       state         = "active"
     }
   }
@@ -285,25 +285,25 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_database_name"></a> [database\_name](#input\_database\_name) | Name for the Sequin database connection | `string` | n/a | yes |
-| <a name="input_postgres_db"></a> [postgres\_db](#input\_postgres\_db) | PostgreSQL database name | `string` | n/a | yes |
-| <a name="input_postgres_host"></a> [postgres\_host](#input\_postgres\_host) | PostgreSQL host address | `string` | n/a | yes |
-| <a name="input_postgres_pass"></a> [postgres\_pass](#input\_postgres\_pass) | PostgreSQL password | `string` | n/a | yes |
-| <a name="input_postgres_user"></a> [postgres\_user](#input\_postgres\_user) | PostgreSQL username | `string` | n/a | yes |
-| <a name="input_backfills"></a> [backfills](#input\_backfills) | Map of backfills to create (key = backfill name). Each entry references a consumer by name and optionally a table and initial state. | <pre>map(object({<br>  consumer_name = string<br>  table         = optional(string)<br>  state         = optional(string)<br>}))</pre> | `{}` | no |
-| <a name="input_consumers"></a> [consumers](#input\_consumers) | Map of sink consumers to create (key = consumer name). Supports schema/table filtering, function references, and all destination types. | <pre>map(object({<br>  schemas = optional(object({<br>    include = optional(list(string))<br>    exclude = optional(list(string))<br>  }))<br>  tables = optional(object({<br>    include = optional(list(object({<br>      name               = string<br>      group_column_names = optional(list(string))<br>    })))<br>    exclude = optional(list(object({ name = string })))<br>  }))<br>  actions              = optional(list(string), ["insert", "update", "delete"])<br>  filter_function      = optional(string)<br>  enrichment_function  = optional(string)<br>  transform_function   = optional(string)<br>  routing_function     = optional(string)<br>  destination          = object({ type = string, ... })<br>  status               = optional(string)<br>  batch_size           = optional(number)<br>  message_grouping     = optional(bool)<br>  max_retry_count      = optional(number)<br>  load_shedding_policy = optional(string)<br>  timestamp_format     = optional(string)<br>}))</pre> | `{}` | no |
-| <a name="input_postgres_port"></a> [postgres\_port](#input\_postgres\_port) | PostgreSQL port | `number` | `5432` | no |
-| <a name="input_postgres_ssl"></a> [postgres\_ssl](#input\_postgres\_ssl) | Enable SSL for the PostgreSQL connection | `bool` | `true` | no |
-| <a name="input_prevent_destroy"></a> [prevent\_destroy](#input\_prevent\_destroy) | Prevent accidental destruction of the database resource | `bool` | `true` | no |
-| <a name="input_replication_slots"></a> [replication\_slots](#input\_replication\_slots) | Replication slot and publication configuration for the database | <pre>list(object({<br>  publication_name = string<br>  slot_name        = string<br>  status           = optional(string, "active")<br>}))</pre> | <pre>[{<br>  publication_name = "sequin_pub"<br>  slot_name        = "sequin_slot"<br>}]</pre> | no |
+| <a name="input_database_name"></a> [database\_name](#input\_database\_name) | Unique name for the Sequin database connection. Used to identify the connection in Sequin and as a reference in sink consumers. | `string` | n/a | yes |
+| <a name="input_postgres_db"></a> [postgres\_db](#input\_postgres\_db) | Name of the PostgreSQL database to connect to. | `string` | n/a | yes |
+| <a name="input_postgres_host"></a> [postgres\_host](#input\_postgres\_host) | Hostname or IP address of the PostgreSQL server. | `string` | n/a | yes |
+| <a name="input_postgres_pass"></a> [postgres\_pass](#input\_postgres\_pass) | PostgreSQL password for the replication user. | `string` | n/a | yes |
+| <a name="input_postgres_user"></a> [postgres\_user](#input\_postgres\_user) | PostgreSQL username. The user must have replication privileges. | `string` | n/a | yes |
+| <a name="input_backfills"></a> [backfills](#input\_backfills) | Map of backfills to create. The map key is used as the backfill identifier. Backfills replay historical rows into an existing consumer. Attributes: `consumer_name` (required) — key of the consumer to backfill; `tables` (optional) — list of fully-qualified table names, e.g. `["public.orders", "public.items"]`, one backfill resource per entry; omit to backfill all tables; `state` (optional) — `"active"` to start immediately or `"paused"`. | <pre>map(object({<br>  consumer_name = string<br>  tables        = optional(list(string))<br>  state         = optional(string)<br>}))</pre> | `{}` | no |
+| <a name="input_consumers"></a> [consumers](#input\_consumers) | Map of sink consumers to create. The map key becomes the consumer name in Sequin. See the [README](https://registry.terraform.io/modules/clintdigital/cdc/sequin/latest) for full schema documentation covering filtering, destination types (kafka/sqs/kinesis/webhook), function references, and advanced options. | `any` | `{}` | no |
+| <a name="input_postgres_port"></a> [postgres\_port](#input\_postgres\_port) | Port the PostgreSQL server is listening on. | `number` | `5432` | no |
+| <a name="input_postgres_ssl"></a> [postgres\_ssl](#input\_postgres\_ssl) | Whether to require SSL for the PostgreSQL connection. | `bool` | `true` | no |
+| <a name="input_prevent_destroy"></a> [prevent\_destroy](#input\_prevent\_destroy) | When `true`, Terraform will refuse to destroy the database resource, preventing accidental deletion of the Sequin connection and all its consumers. | `bool` | `true` | no |
+| <a name="input_replication_slots"></a> [replication\_slots](#input\_replication\_slots) | Logical replication slot and publication configuration. Attributes: `publication_name` (required), `slot_name` (required), `status` (optional, default `"active"`). | <pre>list(object({<br>  publication_name = string<br>  slot_name        = string<br>  status           = optional(string, "active")<br>}))</pre> | <pre>[{<br>  publication_name = "sequin_pub"<br>  slot_name        = "sequin_slot"<br>}]</pre> | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_backfill_ids"></a> [backfill\_ids](#output\_backfill\_ids) | Map of backfill name → ID |
-| <a name="output_consumer_ids"></a> [consumer\_ids](#output\_consumer\_ids) | Map of consumer name → ID |
-| <a name="output_database_id"></a> [database\_id](#output\_database\_id) | ID of the database connection |
+| <a name="output_backfill_ids"></a> [backfill\_ids](#output\_backfill\_ids) | Map of backfill name to Sequin backfill ID for every backfill created by this module. |
+| <a name="output_consumer_ids"></a> [consumer\_ids](#output\_consumer\_ids) | Map of consumer name to Sequin sink consumer ID for every consumer created by this module. |
+| <a name="output_database_id"></a> [database\_id](#output\_database\_id) | The ID of the Sequin database connection resource. |
 <!-- END_TF_DOCS -->
 
 ## Authors

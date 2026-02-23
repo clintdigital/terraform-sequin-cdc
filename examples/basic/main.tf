@@ -24,4 +24,12 @@ module "sequin" {
       }
     }
   }
+
+  backfills = {
+    full-load = {
+      consumer_name = "all-changes-to-kafka"
+      # tables omitted — backfills every table in the database
+      state = "active"
+    }
+  }
 }

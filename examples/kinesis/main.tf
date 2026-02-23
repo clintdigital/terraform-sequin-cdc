@@ -53,7 +53,7 @@ module "sequin" {
   backfills = {
     orders-initial-load = {
       consumer_name = "orders-to-kinesis"
-      table         = "public.orders"
+      tables        = ["public.orders"]
       state         = "active"
     }
   }

@@ -72,7 +72,7 @@ module "sequin" {
   backfills = {
     orders-backfill = {
       consumer_name = "orders-to-kafka"
-      table         = "public.orders"
+      tables        = ["public.orders", "public.order_items"]
       state         = "active"
     }
   }

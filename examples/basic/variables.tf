@@ -30,7 +30,18 @@ variable "postgres_pass" {
   sensitive   = true
 }
 
-variable "webhook_endpoint" {
-  description = "Webhook URL to receive CDC events"
+variable "kafka_hosts" {
+  description = "Kafka broker hosts (comma-separated)"
   type        = string
+}
+
+variable "kafka_username" {
+  description = "Kafka username"
+  type        = string
+}
+
+variable "kafka_password" {
+  description = "Kafka password"
+  type        = string
+  sensitive   = true
 }

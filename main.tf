@@ -54,8 +54,30 @@ resource "sequin_sink_consumer" "this" {
   depends_on = [sequin_database.this]
 }
 
+locals {
+  # Flatten backfills: one resource per (backfill_name, table) pair.
+  # When tables is null or empty, a single entry with table = null is produced (all tables).
+  _backfill_entries = merge([
+    for name, bf in var.backfills :
+    length(coalesce(bf.tables, [])) > 0
+    ? { for t in bf.tables : "${name}/${t}" => {
+        consumer_name = bf.consumer_name
+        table         = t
+        state         = bf.state
+      }
+    }
+    : {
+      (name) = {
+        consumer_name = bf.consumer_name
+        table         = null
+        state         = bf.state
+      }
+    }
+  ]...)
+}
+
 resource "sequin_backfill" "this" {
-  for_each = var.backfills
+  for_each = local._backfill_entries
 
   sink_consumer = sequin_sink_consumer.this[each.value.consumer_name].name
   table         = each.value.table
