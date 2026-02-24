@@ -3,7 +3,7 @@ terraform {
 
   required_providers {
     sequin = {
-      source = "clintdigital/sequin"
+      source = "registry.terraform.io/clintdigital/sequin"
     }
   }
 }
