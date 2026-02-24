@@ -277,9 +277,9 @@ terraform import 'module.sequin["tenant-a"].sequin_database.this' <database-id>
 
 | Name | Type |
 |------|------|
-| [sequin_backfill.this](https://registry.terraform.io/providers/clintdigital/sequin/latest/docs/resources/backfill) | resource |
-| [sequin_database.this](https://registry.terraform.io/providers/clintdigital/sequin/latest/docs/resources/database) | resource |
-| [sequin_sink_consumer.this](https://registry.terraform.io/providers/clintdigital/sequin/latest/docs/resources/sink_consumer) | resource |
+| sequin_backfill.this | resource |
+| sequin_database.this | resource |
+| sequin_sink_consumer.this | resource |
 
 ## Inputs
 
