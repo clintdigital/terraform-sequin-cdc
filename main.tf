@@ -17,7 +17,7 @@ resource "sequin_sink_consumer" "this" {
   database = sequin_database.this.name
 
   dynamic "source" {
-    for_each = each.value.schemas != null || (each.value.tables != null && each.value.tables.exclude != null) ? [1] : []
+    for_each = try(each.value.schemas, null) != null || try(each.value.tables.exclude, null) != null ? [1] : []
     content {
       include_schemas = try(each.value.schemas.include, null)
       exclude_schemas = try(each.value.schemas.exclude, null)
@@ -25,22 +25,22 @@ resource "sequin_sink_consumer" "this" {
     }
   }
 
-  tables = each.value.tables != null && each.value.tables.include != null ? each.value.tables.include : []
+  tables = try(each.value.tables.include, [])
 
-  actions    = each.value.actions
-  filter     = each.value.filter_function
-  enrichment = each.value.enrichment_function
-  transform  = each.value.transform_function
-  routing    = each.value.routing_function
+  actions    = try(each.value.actions, null)
+  filter     = try(each.value.filter_function, null)
+  enrichment = try(each.value.enrichment_function, null)
+  transform  = try(each.value.transform_function, null)
+  routing    = try(each.value.routing_function, null)
 
   destination = each.value.destination
 
-  status               = each.value.status
-  batch_size           = each.value.batch_size
-  message_grouping     = each.value.message_grouping
-  max_retry_count      = each.value.max_retry_count
-  load_shedding_policy = each.value.load_shedding_policy
-  timestamp_format     = each.value.timestamp_format
+  status               = try(each.value.status, null)
+  batch_size           = try(each.value.batch_size, null)
+  message_grouping     = try(each.value.message_grouping, null)
+  max_retry_count      = try(each.value.max_retry_count, null)
+  load_shedding_policy = try(each.value.load_shedding_policy, null)
+  timestamp_format     = try(each.value.timestamp_format, null)
 
   depends_on = [sequin_database.this]
 }
